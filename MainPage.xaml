@@ -1,0 +1,52 @@
+﻿<Page x:Class="TastyTradeReader.MainPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:TastyTradeReader"
+      mc:Ignorable="d" 
+      d:DesignHeight="300" d:DesignWidth="300"
+      Title="MainPage">
+
+    <Page.Resources>
+        <!--<local:EmployeeList x:Key="myEmployeeList">
+            <local:Employee EmployeeNumber="1" FirstName="John" LastName="Dow" Title="Accountant" Department="Payroll" />
+            <local:Employee EmployeeNumber="2" FirstName="Jane" LastName="Austin" Title="Account Executive" Department="Customer Management" />
+            <local:Employee EmployeeNumber="3" FirstName="Ralph" LastName="Emmerson" Title="QA Manager" Department="Product Development" />
+            <local:Employee EmployeeNumber="4" FirstName="Patrick" LastName="Fitzgerald" Title="QA Manager" Department="Product Development" />
+            <local:Employee EmployeeNumber="5" FirstName="Charles" LastName="Dickens" Title="QA Manager" Department="Product Development" />
+        </local:EmployeeList>-->
+        <local:Feed x:Key="myFeedList">
+            <local:FeedItem Title="The Long &amp; Short Of It - October 9, 2015" Image="https://s3.amazonaws.com/tastytradepublicmedia/show/129/episode/22787/image/itunes/TTL_LSI_151009_VOD.jpg?1444423007" Movie="https://feeds.tastytrade.com/media/35242/TTL_LSI_151009_VOD.mov" PubDate="09-Oct-2015" />
+            <local:FeedItem Title="Last Call - October 9, 2015 - Welcome to Sosnoff World" Image="https://s3.amazonaws.com/tastytradepublicmedia/show/1/episode/22786/image/itunes/LC_SHOW_151009_VOD.jpg?1444421615" Movie="https://feeds.tastytrade.com/media/35240/LC_SHOW_151009_VOD.mov" PubDate="09 Oct 2015 15:12:00 -0500" />
+        </local:Feed>
+    </Page.Resources>
+       <Grid DataContext="{StaticResource myFeedList}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="45" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <ListBox Name="employeeListBox"  ItemsSource="{Binding }" Grid.Row="0" />
+        <Grid Grid.Row="1"  DataContext="{Binding ElementName=employeeListBox, Path=SelectedItem}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="80" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Row="0" Grid.Column="0">Title</Label>
+            <Label Grid.Row="1" Grid.Column="0" Content="Image"/>
+            <Label Grid.Row="2" Grid.Column="0" Content="Movie"/>
+            <Label Grid.Row="3" Grid.Column="0" Content="PubDate"/>
+
+            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=Title}" />
+            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Path=Image}" />
+            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Path=Movie}" />
+            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Path=PubDate}" />
+        </Grid>
+    </Grid>
+</Page>
