@@ -5,7 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:TastyTradeReader"
       mc:Ignorable="d" 
-      d:DesignHeight="300" d:DesignWidth="300"
+      d:DesignHeight="500" d:DesignWidth="300"
       Title="MainPage">
 
     <Page.Resources>
@@ -23,13 +23,28 @@
     </Page.Resources>
        <Grid DataContext="{StaticResource myFeedList}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="45" />
+            <RowDefinition Height="300" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <ListBox Name="employeeListBox"  ItemsSource="{Binding }" Grid.Row="0" />
+        <ListView Margin="10" ItemsSource="{Binding}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel>
+                        <TextBlock Text="{Binding Title}" />
+                        <TextBlock Text="{Binding PubDate}" />
+                        <Rectangle Height="20">
+                            <Rectangle.Fill>
+                                <SolidColorBrush Color="Red" />
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <ListBox Name="employeeListBox"  ItemsSource="{Binding }" Grid.Row="1" />
         <Grid Grid.Row="1"  DataContext="{Binding ElementName=employeeListBox, Path=SelectedItem}">
             <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
+                <RowDefinition Height="45" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
@@ -38,15 +53,15 @@
                 <ColumnDefinition Width="80" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Label Grid.Row="0" Grid.Column="0">Title</Label>
-            <Label Grid.Row="1" Grid.Column="0" Content="Image"/>
-            <Label Grid.Row="2" Grid.Column="0" Content="Movie"/>
-            <Label Grid.Row="3" Grid.Column="0" Content="PubDate"/>
+            <Label Grid.Row="1" Grid.Column="0">Title</Label>
+            <Label Grid.Row="2" Grid.Column="0" Content="Image"/>
+            <Label Grid.Row="3" Grid.Column="0" Content="Movie"/>
+            <Label Grid.Row="4" Grid.Column="0" Content="PubDate"/>
 
-            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=Title}" />
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Path=Image}" />
-            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Path=Movie}" />
-            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Path=PubDate}" />
+            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Path=Title}" />
+            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Path=Image}" />
+            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Path=Movie}" />
+            <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Path=PubDate}" />
         </Grid>
     </Grid>
 </Page>
