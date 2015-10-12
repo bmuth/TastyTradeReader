@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Mail;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -17,6 +19,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
 using System.Xml.Linq;
+using System.Xml.Serialization;
 
 namespace TastyTradeReader
 {
@@ -76,9 +79,76 @@ namespace TastyTradeReader
             return x;
         }
 
-        private void Button_Click (object sender, RoutedEventArgs e)
+         private async void Button_Click (object sender, RoutedEventArgs e)
         {
+            Button button = sender as Button;
+            FeedItem fi = button.Tag as FeedItem;
+            DependencyObject obj = (DependencyObject) sender;
 
+            while (!(obj is ListViewItem))
+            {
+                obj = VisualTreeHelper.GetParent (obj);
+            }
+            ListViewItem vi = (ListViewItem) obj;
+            ProgressBar pb = vi.GetChildOfType<ProgressBar> ();
+            button.Visibility = Visibility.Hidden;
+            pb.Visibility = Visibility.Visible;
+
+            await DownloadMovie (fi, pb);
+
+            pb.Visibility = Visibility.Hidden;
+            Image image = button.GetChildOfType<Image> ();
+            BitmapImage bitmapImage = new BitmapImage ();
+
+            Uri uri = new Uri ("ms-appx://Assets/Images/repeat_download.png");
+            bitmapImage.UriSource = uri;
+            image.Source = bitmapImage;
+            button.Visibility = Visibility.Visible;
+        }
+
+        private async Task DownloadMovie (FeedItem fi, ProgressBar pb)
+        {
+            Uri uri = new Uri (fi.Movie);
+
+            string filename = CreateFileName (fi);
+
+            using (WebClient client = new WebClient ())
+            {
+                client.DownloadProgressChanged += (o, e) =>
+                {
+                    pb.Value = e.ProgressPercentage;
+                };
+
+                await client.DownloadFileTaskAsync (uri, filename);
+                fi.LocalMovie = filename;
+
+                XmlSerializer ser = new XmlSerializer (typeof (FeedItem));
+                using (TextWriter writer = new StreamWriter (System.IO.Path.GetDirectoryName (filename) + "\\feed.xml"))
+                {
+                    ser.Serialize (writer, fi);
+                    writer.Close ();
+                }
+            }
+        }
+
+        private string CreateFileName (FeedItem fi)
+        {
+            string path = (string) App.Current.Resources["PodcastPath"];
+            string dir = fi.PubDate.ToString ("yyyy-MMM-dd HHmm");
+            path += dir;
+            try
+            {
+                Directory.CreateDirectory (path);
+            }
+            catch (Exception ex)
+            {
+                string msg = ex.Message;
+                int x = 4;
+            }
+            path += "\\";
+            string name = fi.Movie.Substring (fi.Movie.LastIndexOf ('/') + 1);
+            path += name;
+            return path;
         }
     }
 }

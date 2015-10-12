@@ -13,6 +13,12 @@
             <local:FeedItem Title="The Long &amp; Short Of It - October 9, 2015" Image="https://s3.amazonaws.com/tastytradepublicmedia/show/129/episode/22787/image/itunes/TTL_LSI_151009_VOD.jpg?1444423007" Movie="https://feeds.tastytrade.com/media/35242/TTL_LSI_151009_VOD.mov" PubDate="09-Oct-2015" />
             <local:FeedItem Title="Last Call - October 9, 2015 - Welcome to Sosnoff World" Image="https://s3.amazonaws.com/tastytradepublicmedia/show/1/episode/22786/image/itunes/LC_SHOW_151009_VOD.jpg?1444421615" Movie="https://feeds.tastytrade.com/media/35240/LC_SHOW_151009_VOD.mov" PubDate="09 Oct 2015 15:12:00 -0500" />
         </local:Feed>
+        <Style x:Key="buttonStyle">
+            <Setter Property="Button.Background" Value="Transparent" />
+            <Setter Property="Button.Height" Value="16" />
+            <Setter Property="Button.Width" Value="16" />
+            <Setter Property="Button.BorderThickness" Value="0" />
+        </Style>
     </Page.Resources>
     <Grid Name="FeedGrid" DataContext="{StaticResource myFeedList}">
         <Grid.RowDefinitions>
@@ -31,18 +37,16 @@
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="32" />
+                                <ColumnDefinition Width="20" />
                             </Grid.ColumnDefinitions>
                             <Image Grid.Column="0" HorizontalAlignment="Left" Height="100" Width="190" Source="{Binding Image}" />
-                            <Button Width="32" Height="32" Grid.Column="1" Click="Button_Click">
-                                <Image Source="download-icon.png" Width="32" Height="32" RenderOptions.BitmapScalingMode="Fant" VerticalAlignment="Top" Stretch="Fill" StretchDirection="DownOnly" />
+                            <Button  Grid.Column="1" Tag="{Binding}" Style="{StaticResource buttonStyle}" VerticalAlignment="Top" Click="Button_Click">
+                                <Image Source="Images/download.png"     />
                             </Button>
                         </Grid>
                         <TextBlock Text="{Binding Title}" FontWeight="Bold" TextWrapping="Wrap" />
                         <TextBlock Text="{Binding PubDate}" FontSize="8pt" />
-                        <Button >
-                            <Image Source="download-icon.png" Width="32" Height="32" RenderOptions.BitmapScalingMode="Fant" VerticalAlignment="Top" Stretch="Fill" StretchDirection="DownOnly" />
-                        </Button>
+                        <ProgressBar Height="3" Visibility="Hidden"/>
                     </StackPanel>
                 </DataTemplate>
             </ListView.ItemTemplate>

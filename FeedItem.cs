@@ -14,11 +14,12 @@ namespace TastyTradeReader
         public string Subtitle { get; set; }
         public string Image { get; set; }
         public string Movie { get; set; }
-        public DateTime? PubDate { get; set; }
+        public string LocalMovie { get; set; }
+        public DateTime PubDate { get; set; }
 
         public FeedItem () { }
 
-        public FeedItem (string title, string subtitle, string image, string movie, DateTime? pubdate)
+        public FeedItem (string title, string subtitle, string image, string movie, DateTime pubdate)
         {
             Title = title;
             Subtitle = subtitle;
