@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -28,17 +29,60 @@ namespace TastyTradeReader
     /// </summary>
     public partial class MainPage : Page
     {
-        private Feed TotalFeed;
+        private List<FeedItem> DisplayedFeed;
+        private List<FeedItem> TotalFeed;
+        private FeedDict m_FeedDictionary;
 
         public MainPage ()
         {
             InitializeComponent ();
+
+            List<string> man = new List<string> ();
+            Assembly assembly = Assembly.GetExecutingAssembly ();
+            foreach (string s in assembly.GetManifestResourceNames ())
+            {
+                man.Add (s);
+            }
+            int x = 4;
         }
 
         private async void MainPageLoaded (object sender, RoutedEventArgs e)
         {
-            TotalFeed = await FetchTastyTradeFeed ();
-            FeedGrid.DataContext = TotalFeed.GetRange (0, 50);
+            FetchLocalFeed ();
+            Feed feed = await FetchTastyTradeFeed ();
+
+            foreach (FeedItem fi in feed)
+            {
+                if (!m_FeedDictionary.ContainsKey (fi.PubDate))
+                {
+                    m_FeedDictionary[fi.PubDate] = fi;
+                }
+            }
+
+            TotalFeed = (from pair in m_FeedDictionary
+                         orderby pair.Key descending
+                         select pair.Value).ToList ();
+
+            DisplayedFeed = TotalFeed.GetRange (0, 50);
+            FeedGrid.DataContext = DisplayedFeed;
+        }
+
+        private void FetchLocalFeed ()
+        {
+            m_FeedDictionary = new FeedDict ();
+
+            string path = (string) App.Current.Resources["PodcastPath"];
+            var folders = Directory.EnumerateDirectories (path);
+            m_FeedDictionary = new FeedDict ();
+            foreach (var folder in folders)
+            {
+                string f = new DirectoryInfo (folder).Name;
+                DateTime dt = DateTime.ParseExact (f, "yyyy-MMM-dd HHmm", CultureInfo.InvariantCulture);
+                StreamReader sr = new StreamReader (folder + "\\feed.xml");
+                XmlSerializer xr = new XmlSerializer (typeof (FeedItem));
+                FeedItem fi = (FeedItem) xr.Deserialize (sr);
+                m_FeedDictionary[dt] = fi;
+            }
         }
 
         private async Task<Feed> FetchTastyTradeFeed ()
@@ -97,13 +141,14 @@ namespace TastyTradeReader
             await DownloadMovie (fi, pb);
 
             pb.Visibility = Visibility.Hidden;
-            Image image = button.GetChildOfType<Image> ();
-            BitmapImage bitmapImage = new BitmapImage ();
-
-            Uri uri = new Uri ("ms-appx://Assets/Images/repeat_download.png");
-            bitmapImage.UriSource = uri;
-            image.Source = bitmapImage;
             button.Visibility = Visibility.Visible;
+
+            Image image = button.GetChildOfType<Image> ();
+
+////            Uri uri = new Uri ("ms-appx://TastyTradeReader;component/Images/repeat_download.png");
+//            Uri uri = new Uri ("pack://application:,,,/TastyTradeReader;component/Images/repeat_download.png");
+//            BitmapImage bitmapImage = new BitmapImage (uri);
+//            image.Source = bitmapImage;
         }
 
         private async Task DownloadMovie (FeedItem fi, ProgressBar pb)
@@ -143,12 +188,17 @@ namespace TastyTradeReader
             catch (Exception ex)
             {
                 string msg = ex.Message;
-                int x = 4;
             }
             path += "\\";
             string name = fi.Movie.Substring (fi.Movie.LastIndexOf ('/') + 1);
             path += name;
             return path;
+        }
+
+        private void Play_Click (object sender, RoutedEventArgs e)
+        {
+            VideoWindow vw = new VideoWindow ();
+            vw.Show ();
         }
     }
 }

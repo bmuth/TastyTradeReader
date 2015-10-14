@@ -2,19 +2,80 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
+using System.Xml;
+using System.Windows.Data;
+using System.Globalization;
+using System.Windows.Media.Imaging;
+using System.Windows;
+using System.Windows.Media;
+using System.ComponentModel;
 
 namespace TastyTradeReader
 {
+    public class FeedDict : Dictionary<DateTime, FeedItem>
+    {}
+
     public class Feed : List<FeedItem>
     { }
 
-    public class FeedItem
+    public class FeedItem : INotifyPropertyChanged
     {
+        private bool _ifdownloaded;
+
+        private string _image;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+
+        public bool IfDownloaded
+        {
+            get
+            {
+                return _ifdownloaded;
+            }
+            set
+            {
+                if (_ifdownloaded != value)
+                {
+                    _ifdownloaded = value;
+                    this.NotifyPropertyChanged ("IfDownloaded");
+                }
+            }
+        }
+
+        private void NotifyPropertyChanged (string propName)
+        {
+            if (this.PropertyChanged != null)
+            {
+                this.PropertyChanged (this, new PropertyChangedEventArgs (propName));
+            }
+        }
+
         public string Title { get; set; }
         public string Subtitle { get; set; }
         public string Image { get; set; }
         public string Movie { get; set; }
-        public string LocalMovie { get; set; }
+        public string LocalMovie
+        {
+            get
+            {
+                return _image;
+            }
+
+            set
+            {
+                if (string.IsNullOrEmpty (value))
+                {
+                    IfDownloaded = false;
+                }
+                else
+                {
+                    IfDownloaded = true;
+                }
+                _image = value;
+            }
+        }
         public DateTime PubDate { get; set; }
 
         public FeedItem () { }
@@ -33,5 +94,32 @@ namespace TastyTradeReader
             return String.Format ("{0} {1}", Title.Substring (0, Math.Min (Title.Length, 20)), PubDate);
         }
 
+    }
+
+    public class IfDownloadedToImageconverter : IValueConverter
+    {
+        public object Convert (object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (targetType != typeof (ImageSource))
+            {
+                throw new InvalidOperationException ("The target must be a FeedItem.");
+            }
+
+            string u;
+            if (((bool) value)) // if downloaded
+            {
+                u = "pack://application:,,,/TastyTradeReader;component/Images/repeat_download.png";
+            }
+            else
+            {
+                u = "pack://application:,,,/TastyTradeReader;component/Images/download.png";
+            }
+            return new BitmapImage (new Uri (u));
+
+        }
+        public object ConvertBack (object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return DependencyProperty.UnsetValue;
+        }
     }
 }

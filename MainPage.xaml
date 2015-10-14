@@ -9,9 +9,10 @@
       Title="MainPage" Loaded="MainPageLoaded">
 
     <Page.Resources>
+        <local:IfDownloadedToImageconverter x:Key="FeedItemConverter" />
         <local:Feed x:Key="myFeedList">
-            <local:FeedItem Title="The Long &amp; Short Of It - October 9, 2015" Image="https://s3.amazonaws.com/tastytradepublicmedia/show/129/episode/22787/image/itunes/TTL_LSI_151009_VOD.jpg?1444423007" Movie="https://feeds.tastytrade.com/media/35242/TTL_LSI_151009_VOD.mov" PubDate="09-Oct-2015" />
-            <local:FeedItem Title="Last Call - October 9, 2015 - Welcome to Sosnoff World" Image="https://s3.amazonaws.com/tastytradepublicmedia/show/1/episode/22786/image/itunes/LC_SHOW_151009_VOD.jpg?1444421615" Movie="https://feeds.tastytrade.com/media/35240/LC_SHOW_151009_VOD.mov" PubDate="09 Oct 2015 15:12:00 -0500" />
+            <local:FeedItem Title="The Long &amp; Short Of It - October 9, 2015" Image="https://s3.amazonaws.com/tastytradepublicmedia/show/129/episode/22787/image/itunes/TTL_LSI_151009_VOD.jpg?1444423007" Movie="https://feeds.tastytrade.com/media/35242/TTL_LSI_151009_VOD.mov" PubDate="09-Oct-2015" LocalMovie="" />
+            <local:FeedItem Title="Last Call - October 9, 2015 - Welcome to Sosnoff World" Image="https://s3.amazonaws.com/tastytradepublicmedia/show/1/episode/22786/image/itunes/LC_SHOW_151009_VOD.jpg?1444421615" Movie="https://feeds.tastytrade.com/media/35240/LC_SHOW_151009_VOD.mov" PubDate="09 Oct 2015 15:12:00 -0500" LocalMovie=""  />
         </local:Feed>
         <Style x:Key="buttonStyle">
             <Setter Property="Button.Background" Value="Transparent" />
@@ -40,9 +41,17 @@
                                 <ColumnDefinition Width="20" />
                             </Grid.ColumnDefinitions>
                             <Image Grid.Column="0" HorizontalAlignment="Left" Height="100" Width="190" Source="{Binding Image}" />
-                            <Button  Grid.Column="1" Tag="{Binding}" Style="{StaticResource buttonStyle}" VerticalAlignment="Top" Click="Button_Click">
-                                <Image Source="Images/download.png"     />
+                            <StackPanel Grid.Column="1" >
+                            <Button Tag="{Binding}" Style="{StaticResource buttonStyle}" VerticalAlignment="Top" Click="Button_Click">
+                                    <!--<Image Source="Images/download.png"     />-->
+                                <Image Source="{Binding Path=IfDownloaded, Converter={StaticResource FeedItemConverter}}" />
                             </Button>
+                            <Button Tag="{Binding}" Style="{StaticResource buttonStyle}" VerticalAlignment="Top" Click="Play_Click" >
+                                    <!--<Image Source="Images/download.png"     />-->
+                                <Image Source="Images/play.png" />
+                            </Button>                             
+                            </StackPanel>
+ 
                         </Grid>
                         <TextBlock Text="{Binding Title}" FontWeight="Bold" TextWrapping="Wrap" />
                         <TextBlock Text="{Binding PubDate}" FontSize="8pt" />
