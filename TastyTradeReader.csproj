@@ -135,6 +135,12 @@
   <ItemGroup>
     <Resource Include="Images\play.png" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="WPF_Media_Player\WPF_Media_Player.csproj">
+      <Project>{7ac0a490-ab5c-4d10-8de4-cd8c17e8c6bf}</Project>
+      <Name>WPF_Media_Player</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
