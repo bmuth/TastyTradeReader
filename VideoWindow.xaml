@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:TastyTradeReader"
         xmlns:localx="clr-namespace:WPF_Media_Player;assembly=WPF_Media_Player"    
         mc:Ignorable="d"
-        Title="TastyTrade" Height="300" Width="500">
+        Title="TastyTrade" Height="400" Width="500" Loaded="Video_Window_OnLoaded">
   <Grid Width="Auto">
     <localx:ucMediaPlayer x:Name="ucMediaPlayer1"/>
   </Grid>

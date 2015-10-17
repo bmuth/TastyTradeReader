@@ -197,7 +197,16 @@ namespace TastyTradeReader
 
         private void Play_Click (object sender, RoutedEventArgs e)
         {
-            VideoWindow vw = new VideoWindow ();
+            Button button = sender as Button;
+            FeedItem fi = button.Tag as FeedItem;
+
+            if (!fi.IfDownloaded)
+            {
+                MessageBox.Show (string.Format ("This file needs to be downloaded first. \r\n{0}", fi.Title.Substring (0, 40)));
+                return;
+            }
+
+            VideoWindow vw = new VideoWindow (fi);
             vw.Show ();
         }
     }

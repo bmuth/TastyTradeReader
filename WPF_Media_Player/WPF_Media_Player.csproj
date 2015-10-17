@@ -79,7 +79,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Utility Classes\GridLengthAnimation.cs" />
-    <Compile Include="Utility Classes\MediaItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -104,7 +103,6 @@
       <SubType>Code</SubType>
       <DependentUpon>ucMediaPlayer.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Utility Classes\XmlHandler.cs" />
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

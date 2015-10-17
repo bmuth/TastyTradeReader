@@ -19,9 +19,26 @@ namespace TastyTradeReader
     /// </summary>
     public partial class VideoWindow : Window
     {
+        FeedItem m_fi;
+
         public VideoWindow ()
         {
             InitializeComponent ();
+
+        }
+
+        public VideoWindow (FeedItem fi)
+        {
+            m_fi = fi;
+
+            InitializeComponent ();
+
+            ucMediaPlayer1.ImageFile = fi.Image;
+            ucMediaPlayer1.MovieFile = fi.LocalMovie;
+        }
+
+        private void Video_Window_OnLoaded (object sender, RoutedEventArgs e)
+        {
         }
     }
 }
