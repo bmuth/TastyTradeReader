@@ -40,8 +40,26 @@ namespace TastyTradeReader
                 {
                     _ifdownloaded = value;
                     this.NotifyPropertyChanged ("IfDownloaded");
+                    this.NotifyPropertyChanged ("IfNotDownloaded");
                 }
             }
+        }
+
+        public bool IfNotDownloaded
+        {
+            get
+            {
+                return !_ifdownloaded;
+            }
+            //set
+            //{
+            //    if (_ifdownloaded != value)
+            //    {
+            //        _ifdownloaded = !value;
+            //        this.NotifyPropertyChanged ("IfDownloaded");
+            //        this.NotifyPropertyChanged ("IfNotDownloaded");
+            //    }
+            //}
         }
 
         private void NotifyPropertyChanged (string propName)
@@ -100,21 +118,29 @@ namespace TastyTradeReader
     {
         public object Convert (object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (targetType != typeof (ImageSource))
+            if (targetType != typeof (Visibility))
             {
-                throw new InvalidOperationException ("The target must be a FeedItem.");
+                throw new InvalidOperationException ("The target must be a Visibility");
             }
 
-            string u;
-            if (((bool) value)) // if downloaded
+            //if (((bool) value)) // if downloaded
+            //{
+            //    u = "pack://application:,,,/TastyTradeReader;component/Images/repeat_download.png";
+            //}
+            //else
+            //{
+            //    u = "pack://application:,,,/TastyTradeReader;component/Images/download.png";
+            //}
+            //return new BitmapImage (new Uri (u));
+
+            if ((bool) value)
             {
-                u = "pack://application:,,,/TastyTradeReader;component/Images/repeat_download.png";
+                return Visibility.Visible;
             }
             else
             {
-                u = "pack://application:,,,/TastyTradeReader;component/Images/download.png";
+                return Visibility.Collapsed;
             }
-            return new BitmapImage (new Uri (u));
 
         }
         public object ConvertBack (object value, Type targetType, object parameter, CultureInfo culture)
