@@ -20,6 +20,7 @@ namespace TastyTradeReader
     public partial class VideoWindow : Window
     {
         FeedItem m_fi;
+        bool bSaveSwitch = false;
 
         public VideoWindow ()
         {
@@ -27,7 +28,7 @@ namespace TastyTradeReader
 
         }
 
-        public VideoWindow (FeedItem fi)
+        public void StartFeed (FeedItem fi)
         {
             m_fi = fi;
 
@@ -39,6 +40,19 @@ namespace TastyTradeReader
 
         private void Video_Window_OnLoaded (object sender, RoutedEventArgs e)
         {
+            this.Height = Properties.Settings.Default.VidHeight;
+            this.Width = Properties.Settings.Default.VidWidth;
+            bSaveSwitch = true;
+        }
+
+        private void Window_SizeChanged (object sender, SizeChangedEventArgs e)
+        {
+            if (bSaveSwitch)
+            {
+                Properties.Settings.Default.VidHeight = this.Height;
+                Properties.Settings.Default.VidWidth = this.Width;
+                Properties.Settings.Default.Save ();
+            }
         }
     }
 }

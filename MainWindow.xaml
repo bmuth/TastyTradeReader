@@ -47,6 +47,7 @@
             </Button>
             <Button x:Name="btnOnlyDownloaded" VerticalAlignment="Center"   RenderTransformOrigin="0.5,0.5" Background="Transparent" Foreground="Gray" FontFamily="Wingdings" FontSize="18" BorderBrush="Transparent"  ToolTip="Download Selected Shows" Content="&#xCA;" Click="btnOnlyDownloaded_Click" />
             <ToggleButton x:Name="btnFavourites"  VerticalAlignment="Center"   RenderTransformOrigin="0.5,0.5" Background="Transparent" Foreground="Gray" FontFamily="Wingdings 2" FontSize="18" BorderBrush="Transparent"  ToolTip="Show only favourites" Content="&#xF3;" Click="btnFavourites_Click"></ToggleButton>
+            <ToggleButton x:Name="btnLocalFiles"  VerticalAlignment="Center"   RenderTransformOrigin="0.5,0.5" Background="Transparent" Foreground="Gray" FontFamily="Wingdings" FontSize="18" BorderBrush="Transparent"  ToolTip="Show only local files" Content="&#x30;" Click="btnLocalFiles_Click"></ToggleButton>
 
         </StackPanel>
         <ListView x:Name="ListShows" Grid.Row="1" SelectionMode="Multiple" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ItemsSource="{Binding}">

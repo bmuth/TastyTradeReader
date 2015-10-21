@@ -33,7 +33,7 @@ namespace WPF_Media_Player
             InitializeComponent ();
             IsPlaying (false);
             timer = new DispatcherTimer ();
-            timer.Interval = TimeSpan.FromMilliseconds (2000);
+            timer.Interval = TimeSpan.FromMilliseconds (200);
             timer.Tick += new EventHandler (timer_Tick);
             sliderTime.IsEnabled = false;
             sliderVolume.IsEnabled = false;
@@ -51,8 +51,6 @@ namespace WPF_Media_Player
             {
                 sliderTime.Value = mediaPlayer.Position.TotalSeconds;
                 currentposition = sliderTime.Value;
- //               Trace.TraceInformation ("pos: {0:F3}", currentposition);
-                
             }
         }
 

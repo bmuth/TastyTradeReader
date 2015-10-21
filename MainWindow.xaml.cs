@@ -47,9 +47,15 @@ namespace TastyTradeReader
             }
         }
 
-        private async void MainPageLoaded (object sender, RoutedEventArgs e)
+        private void MainPageLoaded (object sender, RoutedEventArgs e)
         {
-            FetchLocalFeed ();
+            GetFullFeed ();
+
+        }
+
+        private async void GetFullFeed ()
+        {
+            FetchLocalFeedAsDictionary ();
             Feed feed = await FetchTastyTradeFeed ();
 
             foreach (FeedItem fi in feed)
@@ -61,15 +67,16 @@ namespace TastyTradeReader
             }
 
             m_TotalFeed = (from pair in m_FeedDictionary
-                         orderby pair.Key descending
-                         select pair.Value).ToList ();
+                           orderby pair.Key descending
+                           select pair.Value).ToList ();
 
             m_FavouriteFeed = (from fi in m_TotalFeed where Favourited (fi) select fi).ToList ();
             m_DisplayedFeed = m_TotalFeed.GetRange (CurrentOffset, Math.Min (m_TotalFeed.Count, 50));
+            CurrentOffset = 0;
             FeedGrid.DataContext = m_DisplayedFeed;
         }
 
-        private void FetchLocalFeed ()
+        private void FetchLocalFeedAsDictionary ()
         {
             m_FeedDictionary = new FeedDict ();
 
@@ -208,7 +215,8 @@ namespace TastyTradeReader
                 return;
             }
 
-            VideoWindow vw = new VideoWindow (fi);
+            VideoWindow vw = new VideoWindow ();
+            vw.StartFeed (fi);
             vw.Show ();
         }
 
@@ -257,7 +265,9 @@ namespace TastyTradeReader
                                 "The Skinny On Options Modeling",
                                 "Trades From the Research Team",
                                 "IRA Options",
-                                "Trade Small Trade Often"
+                                "Trade Small Trade Often",
+                                "Top Dogs",
+                                "Strategies for IRA"
             };
             foreach (var title in titles)
             {
@@ -322,6 +332,36 @@ namespace TastyTradeReader
             }
         }
 
+        private void btnLocalFiles_Click (object sender, RoutedEventArgs e)
+        {
+            if (btnLocalFiles.IsChecked == true)
+            {
+                m_TotalFeed = new List<FeedItem> ();
 
+                string path = (string) App.Current.Resources["PodcastPath"];
+                var folders = Directory.EnumerateDirectories (path);
+
+                foreach (var folder in folders)
+                {
+                    string f = new DirectoryInfo (folder).Name;
+                    DateTime dt = DateTime.ParseExact (f, "yyyy-MMM-dd HHmm", CultureInfo.InvariantCulture);
+                    StreamReader sr = new StreamReader (folder + "\\feed.xml");
+                    XmlSerializer xr = new XmlSerializer (typeof (FeedItem));
+                    FeedItem fi = (FeedItem) xr.Deserialize (sr);
+                    m_TotalFeed.Add (fi);
+                }
+
+                CurrentOffset = 0;
+
+                m_FavouriteFeed = (from fi in m_TotalFeed where Favourited (fi) select fi).ToList ();
+                m_DisplayedFeed = m_TotalFeed.GetRange (CurrentOffset, Math.Min (m_TotalFeed.Count, 50));
+
+                FeedGrid.DataContext = m_DisplayedFeed;
+            }
+            else
+            {
+                GetFullFeed ();
+            }
+        }
     }
 }
