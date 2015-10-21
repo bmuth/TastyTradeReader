@@ -10,9 +10,11 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.IO;
+using System.Diagnostics;
 
 
 namespace WPF_Media_Player
@@ -22,29 +24,56 @@ namespace WPF_Media_Player
     /// </summary>
     public partial class ucMediaPlayer : System.Windows.Controls.UserControl
     {
-        #region Instance Fields
-        // private Dictionary<string, MediaItem> mediaItems = new Dictionary<string, MediaItem>();
-        ToggleButton[] btnStars = new ToggleButton[5];
-        #endregion
-        #region Ctor
+        private DispatcherTimer timer;
+        private double currentposition = 0;
+        private bool isDragging = false;
+
         public ucMediaPlayer ()
         {
             InitializeComponent ();
-
+            IsPlaying (false);
+            timer = new DispatcherTimer ();
+            timer.Interval = TimeSpan.FromMilliseconds (2000);
+            timer.Tick += new EventHandler (timer_Tick);
             sliderTime.IsEnabled = false;
             sliderVolume.IsEnabled = false;
         }
-        #endregion
 
-        #region Public properties
+        /***********************************************
+         *
+         * timer_Tick
+         *
+         ***********************************************/
+
+        private void timer_Tick (object sender, EventArgs e)
+        {
+            if (!isDragging)
+            {
+                sliderTime.Value = mediaPlayer.Position.TotalSeconds;
+                currentposition = sliderTime.Value;
+ //               Trace.TraceInformation ("pos: {0:F3}", currentposition);
+                
+            }
+        }
 
         public string ImageFile { get; set; }
         public string MovieFile { get; set; }
 
-        #endregion
+        /***********************************************
+        *
+        * Is Playing
+        *
+        ***********************************************/
 
-        #region Private methods
-
+        private void IsPlaying (bool bValue)
+        {
+            btnStop.IsEnabled = bValue;
+            //btnMoveBackward.IsEnabled = bValue;
+            //btnMoveForward.IsEnabled = bValue;
+            //btnPlay.IsEnabled = bValue;
+            //btnScreenShot.IsEnabled = bValue;
+            //seekBar.IsEnabled = bValue;
+        }
         /// <summary>
         /// Stop media when ended
         /// </summary>
@@ -58,9 +87,17 @@ namespace WPF_Media_Player
         /// </summary>
         private void mediaPlayer_MediaOpened (object sender, RoutedEventArgs e)
         {
-            sliderTime.Maximum = mediaPlayer.NaturalDuration.TimeSpan.TotalMilliseconds;
             sliderTime.IsEnabled = mediaPlayer.IsLoaded;
             sliderVolume.IsEnabled = mediaPlayer.IsLoaded;
+
+            if (mediaPlayer.NaturalDuration.HasTimeSpan)
+            {
+                TimeSpan ts = mediaPlayer.NaturalDuration.TimeSpan;
+                sliderTime.Maximum = ts.TotalSeconds;
+                sliderTime.SmallChange = 1;
+                sliderTime.LargeChange = Math.Min (10, ts.Seconds / 10);
+            }
+            timer.Start ();
         }
 
         /// <summary>
@@ -70,6 +107,7 @@ namespace WPF_Media_Player
         {
             // The Stop method stops and resets the media to be played from
             // the beginning.
+            IsPlaying (false);
             mediaPlayer.Stop ();
         }
 
@@ -82,6 +120,7 @@ namespace WPF_Media_Player
         {
             // The Pause method pauses the media if it is currently running.
             // The Play method can be used to resume.
+            IsPlaying (false);
             mediaPlayer.Pause ();
         }
 
@@ -99,23 +138,12 @@ namespace WPF_Media_Player
                 mediaPlayer.Visibility = Visibility.Visible;
             }
 
+            IsPlaying (true);
             mediaPlayer.Play ();
             mediaPlayer.Volume = (double) sliderVolume.Value;
         }
 
-        /// <summary>
-        /// seek media to position (x)
-        /// </summary>
-        private void SeekToMediaPosition (object sender, RoutedPropertyChangedEventArgs<double> args)
-        {
-            int SliderValue = (int) sliderTime.Value;
-            // Overloaded constructor takes the arguments days, hours, minutes, seconds, miniseconds.
-            // Create a TimeSpan with miliseconds equal to the slider value.
-            TimeSpan ts = new TimeSpan (0, 0, 0, 0, SliderValue);
-            mediaPlayer.Position = ts;
-        }
-
-        /// <summary>
+         /// <summary>
         /// change media volume to position (x)
         /// </summary>
         private void ChangeMediaVolume (object sender, RoutedPropertyChangedEventArgs<double> args)
@@ -123,8 +151,28 @@ namespace WPF_Media_Player
             mediaPlayer.Volume = (double) sliderVolume.Value;
         }
 
+        /**************************************************
+        *
+        * seekBar_DragStarted
+        *
+        **************************************************/
 
-        #endregion
+        private void seekBar_DragStarted (object sender, DragStartedEventArgs e)
+        {
+            isDragging = true;
+        }
+
+        /**************************************************
+        *
+        * seekBar_DragCompleted
+        *
+        **************************************************/
+
+        private void seekBar_DragCompleted (object sender, DragCompletedEventArgs e)
+        {
+            isDragging = false;
+            mediaPlayer.Position = TimeSpan.FromSeconds (sliderTime.Value);
+        }
 
         private void UserControl_Loaded (object sender, RoutedEventArgs e)
         {

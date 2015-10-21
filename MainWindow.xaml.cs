@@ -125,7 +125,7 @@ namespace TastyTradeReader
             return x;
         }
 
-         private async void Button_Click (object sender, RoutedEventArgs e)
+         private async void Download_Click (object sender, RoutedEventArgs e)
         {
             Button button = sender as Button;
             FeedItem fi = button.Tag as FeedItem;
@@ -137,13 +137,13 @@ namespace TastyTradeReader
             }
             ListViewItem vi = (ListViewItem) obj;
             ProgressBar pb = vi.GetChildOfType<ProgressBar> ();
-            button.Visibility = Visibility.Hidden;
+            //button.Visibility = Visibility.Hidden;
             pb.Visibility = Visibility.Visible;
 
             await DownloadMovie (fi, pb);
 
 //            pb.Visibility = Visibility.Hidden;
-            button.Visibility = Visibility.Visible;
+            //button.Visibility = Visibility.Visible;
 
             Image image = button.GetChildOfType<Image> ();
 
@@ -302,5 +302,26 @@ namespace TastyTradeReader
             ProgressBar pb = sender as ProgressBar;
             pb.Visibility = (pb.Value == 0 || pb.Value == 100) ? Visibility.Hidden : Visibility.Visible;
         }
+
+
+        private void Delete_Click (object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            FeedItem fi = button.Tag as FeedItem;
+
+            DirectoryInfo dir = new DirectoryInfo (System.IO.Path.GetDirectoryName (fi.LocalMovie));
+            try
+            {
+                dir.Delete (true);
+                fi.LocalMovie = null;
+                fi.IfDownloaded = false;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show (string.Format ("Failed to delete {0}. {1}", dir.Name, ex.Message));
+            }
+        }
+
+
     }
 }

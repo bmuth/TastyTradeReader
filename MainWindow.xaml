@@ -66,14 +66,14 @@
                             <Image Grid.Column="0" HorizontalAlignment="Left" Height="100" Width="190" Source="{Binding Image}" />
                             <Grid Grid.Column="1" Height="100">
                                 <StackPanel>
-                                    <Button Tag="{Binding}" Visibility="{Binding Path=IfNotDownloaded, Converter={StaticResource FeedItemConverter}}" Style="{StaticResource buttonStyle}" VerticalAlignment="Top" Click="Button_Click">
+                                    <Button Tag="{Binding}" Visibility="{Binding Path=IfNotDownloaded, Converter={StaticResource FeedItemConverter}}" Style="{StaticResource buttonStyle}" VerticalAlignment="Top" Click="Download_Click">
                                         <Image Source="Images/download.png"  />
                                     </Button>
-                                    <Button Tag="{Binding}" Visibility="{Binding Path=IfDownloaded, Converter={StaticResource FeedItemConverter}}" Style="{StaticResource buttonStyle}" VerticalAlignment="Top" Click="Button_Click">
+                                    <Button Tag="{Binding}" Visibility="{Binding Path=IfDownloaded, Converter={StaticResource FeedItemConverter}}" Style="{StaticResource buttonStyle}" VerticalAlignment="Top" Click="Download_Click">
                                     <Image Source="Images/refresh.png" />
                                 </Button>
                                 <Button Tag="{Binding}" Visibility="{Binding Path=IfDownloaded, Converter={StaticResource FeedItemConverter}}" Style="{StaticResource buttonStyle}" VerticalAlignment="Top"
-                                    Background="Transparent" Foreground="Gray" FontFamily="Wingdings" FontSize="18" BorderBrush="Transparent"  ToolTip="Delete" Content="&#xFB;" />
+                                    Background="Transparent" Foreground="Gray" FontFamily="Wingdings" FontSize="18" BorderBrush="Transparent"  ToolTip="Delete" Content="&#xFB;" Click="Delete_Click" />
                                 </StackPanel>
                                 <Button Tag="{Binding}" Visibility="{Binding Path=IfDownloaded, Converter={StaticResource FeedItemConverter}}" Style="{StaticResource buttonStyle}" VerticalAlignment="Bottom" Click="Play_Click" >
                                     <Image Source="Images/play.png" />
