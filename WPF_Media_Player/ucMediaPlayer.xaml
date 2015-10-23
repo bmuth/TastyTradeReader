@@ -15,7 +15,7 @@
   
  
 
-  <Grid x:Name ="grdMain" Background="White">
+  <Grid x:Name ="grdMain" Background="White" >
 
 
 
@@ -45,16 +45,16 @@
         <Button x:Name="btnPlay" Click="btnPlay_Click" Width="50" Height="50" Margin="10,-30,0,0" Template="{StaticResource controlButtonTemplate}" FontSize="14" FontWeight="Bold" Foreground="LightGreen" Content="4" FontFamily="Webdings" ToolTip="Play"></Button>
         <Button x:Name="btnPause" Click="btnPause_Click"  Width="40" Height="40" Margin="-15,-50,0,0" Template="{StaticResource controlButtonTemplate}" FontSize="14" FontWeight="Bold" Foreground="Orange" Content=";" FontFamily="Webdings" ToolTip="Pause"></Button>
         <Button x:Name="btnStop" Click="btnStop_Click"  Width="30" Height="30" Margin="-10,-45,0,0" Template="{StaticResource controlButtonTemplate}" FontSize="14" FontWeight="Bold" Foreground="Yellow" Content="&lt;" FontFamily="Webdings" ToolTip="Stop"></Button>
-        <!-- Seek Control -->
-        <TextBlock Foreground="Gray" Margin="-10,5,5,5"  VerticalAlignment="Center" FontSize="10">Seek To</TextBlock>
-        <Slider Name="sliderTime" Margin="2,0,0,0" VerticalAlignment="Center" Width="80" Height="Auto" Thumb.DragStarted="seekBar_DragStarted" 
-                        Thumb.DragCompleted="seekBar_DragCompleted"/>
         <!-- Volume Control -->
-        <TextBlock Foreground="Gray" Margin="5,5,5,5"  VerticalAlignment="Center" FontSize="10">Volume</TextBlock>
+        <TextBlock Foreground="Gray" Margin="-10,5,5,5"  VerticalAlignment="Center" FontSize="10">Volume</TextBlock>
         <Slider Name="sliderVolume" Margin="2,0,5,0" VerticalAlignment="Center" ValueChanged="ChangeMediaVolume" Width="100" Height="Auto" Minimum="0" Maximum="1" Value="0.5"/>
+        <!-- Seek Control -->
+        <TextBlock Foreground="Gray" Margin="10,5,5,5"  VerticalAlignment="Center" FontSize="10">Seek To</TextBlock>
+        <Slider Name="sliderTime" Margin="2,0,0,0" VerticalAlignment="Center" Width="200" Height="Auto" Thumb.DragStarted="seekBar_DragStarted" 
+                        Thumb.DragCompleted="seekBar_DragCompleted"/>
 
 
-      </StackPanel>
+            </StackPanel>
     </Border>
 
 

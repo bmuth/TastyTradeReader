@@ -25,10 +25,10 @@ namespace TastyTradeReader.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string Setting {
+        [global::System.Configuration.DefaultSettingValueAttribute("E:\\Finance\\TastyTradePodcasts\\")]
+        public string PodcastPath {
             get {
-                return ((string)(this["Setting"]));
+                return ((string)(this["PodcastPath"]));
             }
         }
         

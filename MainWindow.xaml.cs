@@ -50,7 +50,6 @@ namespace TastyTradeReader
         private void MainPageLoaded (object sender, RoutedEventArgs e)
         {
             GetFullFeed ();
-
         }
 
         private async void GetFullFeed ()
@@ -80,17 +79,25 @@ namespace TastyTradeReader
         {
             m_FeedDictionary = new FeedDict ();
 
-            string path = (string) App.Current.Resources["PodcastPath"];
-            var folders = Directory.EnumerateDirectories (path);
-            m_FeedDictionary = new FeedDict ();
-            foreach (var folder in folders)
+            string path = Properties.Settings.Default.PodcastPath;
+
+            try
             {
-                string f = new DirectoryInfo (folder).Name;
-                DateTime dt = DateTime.ParseExact (f, "yyyy-MMM-dd HHmm", CultureInfo.InvariantCulture);
-                StreamReader sr = new StreamReader (folder + "\\feed.xml");
-                XmlSerializer xr = new XmlSerializer (typeof (FeedItem));
-                FeedItem fi = (FeedItem) xr.Deserialize (sr);
-                m_FeedDictionary[dt] = fi;
+                var folders = Directory.EnumerateDirectories (path);
+                m_FeedDictionary = new FeedDict ();
+                foreach (var folder in folders)
+                {
+                    string f = new DirectoryInfo (folder).Name;
+                    DateTime dt = DateTime.ParseExact (f, "yyyy-MMM-dd HHmm", CultureInfo.InvariantCulture);
+                    StreamReader sr = new StreamReader (folder + "\\feed.xml");
+                    XmlSerializer xr = new XmlSerializer (typeof (FeedItem));
+                    FeedItem fi = (FeedItem) xr.Deserialize (sr);
+                    m_FeedDictionary[dt] = fi;
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show (string.Format ("Failed to enumerate locally downloaded podcasts. {0}", e.Message));
             }
         }
 
@@ -120,7 +127,7 @@ namespace TastyTradeReader
                                               DateTime.Parse (el.Element ("pubDate").Value));
                 feed.Add (fi);
             }
- 
+
             return feed;
         }
 
@@ -132,7 +139,7 @@ namespace TastyTradeReader
             return x;
         }
 
-         private async void Download_Click (object sender, RoutedEventArgs e)
+        private async void Download_Click (object sender, RoutedEventArgs e)
         {
             Button button = sender as Button;
             FeedItem fi = button.Tag as FeedItem;
@@ -149,15 +156,15 @@ namespace TastyTradeReader
 
             await DownloadMovie (fi, pb);
 
-//            pb.Visibility = Visibility.Hidden;
+            //            pb.Visibility = Visibility.Hidden;
             //button.Visibility = Visibility.Visible;
 
             Image image = button.GetChildOfType<Image> ();
 
-////            Uri uri = new Uri ("ms-appx://TastyTradeReader;component/Images/repeat_download.png");
-//            Uri uri = new Uri ("pack://application:,,,/TastyTradeReader;component/Images/repeat_download.png");
-//            BitmapImage bitmapImage = new BitmapImage (uri);
-//            image.Source = bitmapImage;
+            ////            Uri uri = new Uri ("ms-appx://TastyTradeReader;component/Images/repeat_download.png");
+            //            Uri uri = new Uri ("pack://application:,,,/TastyTradeReader;component/Images/repeat_download.png");
+            //            BitmapImage bitmapImage = new BitmapImage (uri);
+            //            image.Source = bitmapImage;
         }
 
         private async Task DownloadMovie (FeedItem fi, ProgressBar pb)
@@ -217,10 +224,11 @@ namespace TastyTradeReader
 
             VideoWindow vw = new VideoWindow ();
             vw.StartFeed (fi);
+            vw.Title = fi.Title;
             vw.Show ();
         }
 
-        private  void btnOnlyDownloaded_Click (object sender, RoutedEventArgs e)
+        private void btnOnlyDownloaded_Click (object sender, RoutedEventArgs e)
         {
             foreach (FeedItem fi in ListShows.SelectedItems)
             {
@@ -267,11 +275,14 @@ namespace TastyTradeReader
                                 "IRA Options",
                                 "Trade Small Trade Often",
                                 "Top Dogs",
-                                "Strategies for IRA"
+                                "Strategies for IRA",
+                                "Options:",
+                                "Calling All Millionaires",
+                                "tasty BITES"
             };
             foreach (var title in titles)
             {
-                if (fi.Title.Contains (title))
+                if (fi.Title.IndexOf (title, StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     return true;
                 }
