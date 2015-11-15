@@ -26,14 +26,15 @@ namespace WPF_Media_Player
     {
         private DispatcherTimer timer;
         private double currentposition = 0;
-        private bool isDragging = false;
+        private bool bDragging = false;
+        private bool bTimerChangedValue = false;
 
         public ucMediaPlayer ()
         {
             InitializeComponent ();
             IsPlaying (false);
             timer = new DispatcherTimer ();
-            timer.Interval = TimeSpan.FromMilliseconds (200);
+            timer.Interval = TimeSpan.FromMilliseconds (2000);
             timer.Tick += new EventHandler (timer_Tick);
             sliderTime.IsEnabled = false;
             sliderVolume.IsEnabled = false;
@@ -47,9 +48,11 @@ namespace WPF_Media_Player
 
         private void timer_Tick (object sender, EventArgs e)
         {
-            if (!isDragging)
+            if (!bDragging)
             {
+                bTimerChangedValue = true;
                 sliderTime.Value = mediaPlayer.Position.TotalSeconds;
+                bTimerChangedValue = false;
                 currentposition = sliderTime.Value;
             }
         }
@@ -157,7 +160,7 @@ namespace WPF_Media_Player
 
         private void seekBar_DragStarted (object sender, DragStartedEventArgs e)
         {
-            isDragging = true;
+            bDragging = true;
         }
 
         /**************************************************
@@ -168,7 +171,7 @@ namespace WPF_Media_Player
 
         private void seekBar_DragCompleted (object sender, DragCompletedEventArgs e)
         {
-            isDragging = false;
+            bDragging = false;
             mediaPlayer.Position = TimeSpan.FromSeconds (sliderTime.Value);
         }
 
@@ -181,6 +184,14 @@ namespace WPF_Media_Player
             mediaPlayerBorder.Visibility = Visibility.Visible;
             //mediaPlayer.Play ();
             mediaPlayer.Volume = (double) sliderVolume.Value;
+        }
+
+        private void sliderTime_ValueChanged (object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!bTimerChangedValue && !bDragging)
+            {
+                mediaPlayer.Position = TimeSpan.FromSeconds (sliderTime.Value);
+            }
         }
     }
 }

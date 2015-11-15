@@ -64,7 +64,7 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="20" />
                             </Grid.ColumnDefinitions>
-                            <Image Grid.Column="0" HorizontalAlignment="Left" Height="100" Width="190" Source="{Binding Image}" />
+                            <Image ToolTip="{Binding Movie}"  Grid.Column="0" HorizontalAlignment="Left" Height="100" Width="190" Source="{Binding Image}" />
                             <Grid Grid.Column="1" Height="100">
                                 <StackPanel>
                                     <Button Tag="{Binding}" Visibility="{Binding Path=IfNotDownloaded, Converter={StaticResource FeedItemConverter}}" Style="{StaticResource buttonStyle}" VerticalAlignment="Top" Click="Download_Click">
@@ -82,8 +82,8 @@
                             </Grid>
 
                         </Grid>
-                        <TextBlock Text="{Binding Title}" FontWeight="Bold" TextWrapping="Wrap" />
-                        <TextBlock Text="{Binding PubDate}" FontSize="8pt" />
+                        <TextBlock Text="{Binding Title}" ToolTip="{Binding Subtitle}" FontWeight="Bold" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding PubDate}" ToolTip="{Binding LocalMovie}" FontSize="8pt" />
                         <ProgressBar x:Name="ProgressChanged1" Height="3" Visibility="Hidden" Value="{Binding Mode=OneWay}" Minimum="0" Maximum="100" ValueChanged="ProgressChanged_ValueChanged" />
                     </StackPanel>
                 </DataTemplate>

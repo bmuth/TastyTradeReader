@@ -31,7 +31,7 @@ namespace TastyTradeReader
     {
         private List<FeedItem> m_DisplayedFeed;
         private List<FeedItem> m_FavouriteFeed;
-        private List<FeedItem> m_TotalFeed;
+        private List<FeedItem> m_DomainFeed;  // either local or remote
         private FeedDict m_FeedDictionary;
         private int CurrentOffset = 0;
 
@@ -65,12 +65,12 @@ namespace TastyTradeReader
                 }
             }
 
-            m_TotalFeed = (from pair in m_FeedDictionary
+            m_DomainFeed = (from pair in m_FeedDictionary
                            orderby pair.Key descending
                            select pair.Value).ToList ();
 
-            m_FavouriteFeed = (from fi in m_TotalFeed where Favourited (fi) select fi).ToList ();
-            m_DisplayedFeed = m_TotalFeed.GetRange (CurrentOffset, Math.Min (m_TotalFeed.Count, 50));
+            m_FavouriteFeed = (from fi in m_DomainFeed where Favourited (fi) select fi).ToList ();
+            m_DisplayedFeed = m_DomainFeed.GetRange (CurrentOffset, Math.Min (m_DomainFeed.Count, 50));
             CurrentOffset = 0;
             FeedGrid.DataContext = m_DisplayedFeed;
         }
@@ -252,9 +252,9 @@ namespace TastyTradeReader
             }
             else
             {
-                if (m_TotalFeed.Count - CurrentOffset > 0)
+                if (m_DomainFeed.Count - CurrentOffset > 0)
                 {
-                    m_DisplayedFeed = m_TotalFeed.GetRange (CurrentOffset, Math.Min (m_TotalFeed.Count - CurrentOffset, 50));
+                    m_DisplayedFeed = m_DomainFeed.GetRange (CurrentOffset, Math.Min (m_DomainFeed.Count - CurrentOffset, 50));
                 }
             }
 
@@ -308,9 +308,9 @@ namespace TastyTradeReader
         {
             int old = CurrentOffset;
             CurrentOffset += 50;
-            if (CurrentOffset > m_TotalFeed.Count)
+            if (CurrentOffset > m_DomainFeed.Count)
             {
-                CurrentOffset = m_TotalFeed.Count;
+                CurrentOffset = m_DomainFeed.Count;
             }
             if (old != CurrentOffset)
             {
@@ -347,7 +347,7 @@ namespace TastyTradeReader
         {
             if (btnLocalFiles.IsChecked == true)
             {
-                m_TotalFeed = new List<FeedItem> ();
+                m_DomainFeed = new List<FeedItem> ();
 
                 string path = (string) App.Current.Resources["PodcastPath"];
                 var folders = Directory.EnumerateDirectories (path);
@@ -359,13 +359,14 @@ namespace TastyTradeReader
                     StreamReader sr = new StreamReader (folder + "\\feed.xml");
                     XmlSerializer xr = new XmlSerializer (typeof (FeedItem));
                     FeedItem fi = (FeedItem) xr.Deserialize (sr);
-                    m_TotalFeed.Add (fi);
+                    m_DomainFeed.Add (fi);
                 }
 
+                m_DomainFeed = m_DomainFeed.OrderByDescending ((s) => s.PubDate).ToList ();
                 CurrentOffset = 0;
 
-                m_FavouriteFeed = (from fi in m_TotalFeed where Favourited (fi) select fi).ToList ();
-                m_DisplayedFeed = m_TotalFeed.GetRange (CurrentOffset, Math.Min (m_TotalFeed.Count, 50));
+                m_FavouriteFeed = (from fi in m_DomainFeed where Favourited (fi) select fi).ToList ();
+                m_DisplayedFeed = m_DomainFeed.GetRange (CurrentOffset, Math.Min (m_DomainFeed.Count, 50));
 
                 FeedGrid.DataContext = m_DisplayedFeed;
             }
