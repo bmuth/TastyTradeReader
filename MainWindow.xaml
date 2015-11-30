@@ -17,12 +17,12 @@
 
         </ResourceDictionary>
     </Window.Resources>
- 
+
     <Grid Name="FeedGrid" DataContext="{StaticResource myFeedList}">
         <Grid.RowDefinitions>
+            <RowDefinition Height="20" />
             <RowDefinition Height="32" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="100" />
         </Grid.RowDefinitions>
         <Grid.Resources>
             <Storyboard x:Key="Pulse">
@@ -39,8 +39,14 @@
                     <EasingDoubleKeyFrame KeyTime="0:0:0.6" Value="1"/>
                 </DoubleAnimationUsingKeyFrames>
             </Storyboard>
-         </Grid.Resources>
-        <StackPanel Orientation="Horizontal">
+        </Grid.Resources>
+        <Menu Grid.Row="0">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Export..." Click="Export_Clicked" />
+                <MenuItem Header="Set _Dir..." Click="SetDir_Clicked" />
+            </MenuItem>
+        </Menu>
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
             <Button x:Name="btnBack"  VerticalAlignment="Center"  RenderTransformOrigin="0.5,0.5" Background="Transparent" Foreground="Gray" FontFamily="Wingdings 3" FontSize="18" BorderBrush="Transparent"  ToolTip="Newer Shows" Content="t" Click="btnBack_Click" >
             </Button>
             <Button x:Name="btnForward" VerticalAlignment="Center" Margin="0,0,30,0"   RenderTransformOrigin="0.5,0.5" Background="Transparent" Foreground="Gray" FontFamily="Wingdings 3" FontSize="18" BorderBrush="Transparent"  ToolTip="Older Shows" Content="u" Click="btnForward_Click" >
@@ -50,7 +56,7 @@
             <ToggleButton x:Name="btnLocalFiles"  VerticalAlignment="Center"   RenderTransformOrigin="0.5,0.5" Background="Transparent" Foreground="Gray" FontFamily="Wingdings" FontSize="18" BorderBrush="Transparent"  ToolTip="Show only local files" Content="&#x30;" Click="btnLocalFiles_Click"></ToggleButton>
 
         </StackPanel>
-        <ListView x:Name="ListShows" Grid.Row="1" SelectionMode="Multiple" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ItemsSource="{Binding}">
+        <ListView x:Name="ListShows" Grid.Row="2" SelectionMode="Multiple" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ItemsSource="{Binding}" >
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel Orientation="Horizontal" />
@@ -71,9 +77,9 @@
                                         <Image Source="Images/download.png"  />
                                     </Button>
                                     <Button Tag="{Binding}" Visibility="{Binding Path=IfDownloaded, Converter={StaticResource FeedItemConverter}}" Style="{StaticResource buttonStyle}" VerticalAlignment="Top" Click="Download_Click">
-                                    <Image Source="Images/refresh.png" />
-                                </Button>
-                                <Button Tag="{Binding}" Visibility="{Binding Path=IfDownloaded, Converter={StaticResource FeedItemConverter}}" Style="{StaticResource buttonStyle}" VerticalAlignment="Top"
+                                        <Image Source="Images/refresh.png" />
+                                    </Button>
+                                    <Button Tag="{Binding}" Visibility="{Binding Path=IfDownloaded, Converter={StaticResource FeedItemConverter}}" Style="{StaticResource buttonStyle}" VerticalAlignment="Top"
                                     Background="Transparent" Foreground="Gray" FontFamily="Wingdings" FontSize="18" BorderBrush="Transparent"  ToolTip="Delete" Content="&#xFB;" Click="Delete_Click" />
                                 </StackPanel>
                                 <Button Tag="{Binding}" Visibility="{Binding Path=IfDownloaded, Converter={StaticResource FeedItemConverter}}" Style="{StaticResource buttonStyle}" VerticalAlignment="Bottom" Click="Play_Click" >
@@ -90,6 +96,6 @@
             </ListView.ItemTemplate>
         </ListView>
 
- 
+
     </Grid>
 </Window>

@@ -34,10 +34,13 @@ namespace TastyTradeReader
         private List<FeedItem> m_DomainFeed;  // either local or remote
         private FeedDict m_FeedDictionary;
         private int CurrentOffset = 0;
+        private string RootDir;
 
         public MainWindow ()
         {
             InitializeComponent ();
+
+            RootDir = Properties.Settings.Default.PodcastPath;
 
             List<string> man = new List<string> ();
             Assembly assembly = Assembly.GetExecutingAssembly ();
@@ -79,7 +82,7 @@ namespace TastyTradeReader
         {
             m_FeedDictionary = new FeedDict ();
 
-            string path = Properties.Settings.Default.PodcastPath;
+            string path = RootDir;
 
             try
             {
@@ -194,7 +197,7 @@ namespace TastyTradeReader
 
         private string CreateFileName (FeedItem fi)
         {
-            string path = (string) App.Current.Resources["PodcastPath"];
+            string path = RootDir; // (string) App.Current.Resources["PodcastPath"];
             string dir = fi.PubDate.ToString ("yyyy-MMM-dd HHmm");
             path += dir;
             try
@@ -349,17 +352,24 @@ namespace TastyTradeReader
             {
                 m_DomainFeed = new List<FeedItem> ();
 
-                string path = (string) App.Current.Resources["PodcastPath"];
+                string path = RootDir; // (string) App.Current.Resources["PodcastPath"];
                 var folders = Directory.EnumerateDirectories (path);
 
                 foreach (var folder in folders)
                 {
                     string f = new DirectoryInfo (folder).Name;
-                    DateTime dt = DateTime.ParseExact (f, "yyyy-MMM-dd HHmm", CultureInfo.InvariantCulture);
-                    StreamReader sr = new StreamReader (folder + "\\feed.xml");
-                    XmlSerializer xr = new XmlSerializer (typeof (FeedItem));
-                    FeedItem fi = (FeedItem) xr.Deserialize (sr);
-                    m_DomainFeed.Add (fi);
+                    try
+                    {
+                        DateTime dt = DateTime.ParseExact (f, "yyyy-MMM-dd HHmm", CultureInfo.InvariantCulture);
+                        StreamReader sr = new StreamReader (folder + "\\feed.xml");
+                        XmlSerializer xr = new XmlSerializer (typeof (FeedItem));
+                        FeedItem fi = (FeedItem) xr.Deserialize (sr);
+                        m_DomainFeed.Add (fi);
+                    }
+                    catch (Exception )
+                    {
+                        // skip. could be irrelevant folder
+                    }
                 }
 
                 m_DomainFeed = m_DomainFeed.OrderByDescending ((s) => s.PubDate).ToList ();
@@ -374,6 +384,95 @@ namespace TastyTradeReader
             {
                 GetFullFeed ();
             }
+        }
+
+        private void SetDir_Clicked (object sender, RoutedEventArgs e)
+        {
+            using (System.Windows.Forms.FolderBrowserDialog fd = new System.Windows.Forms.FolderBrowserDialog ())
+            {
+                fd.Description = "Select the directory for viewing shows";
+                fd.RootFolder = Environment.SpecialFolder.MyComputer;
+
+                System.Windows.Forms.DialogResult rc = fd.ShowDialog ();
+                if (rc == System.Windows.Forms.DialogResult.OK)
+                {
+                    RootDir = fd.SelectedPath;
+                }
+
+                btnLocalFiles.IsChecked = true;
+                btnLocalFiles_Click (null, null);
+
+            }
+        }
+
+        private async void Export_Clicked (object sender, RoutedEventArgs e)
+        {
+            using (System.Windows.Forms.FolderBrowserDialog fd = new System.Windows.Forms.FolderBrowserDialog ())
+            {
+                fd.Description = "Select the directory for exporting selected shows";
+                fd.RootFolder = Environment.SpecialFolder.MyComputer;
+
+                System.Windows.Forms.DialogResult rc = fd.ShowDialog ();
+                if (rc == System.Windows.Forms.DialogResult.OK)
+                {
+                    foreach (FeedItem fi in ListShows.SelectedItems)
+                    {
+                        ListViewItem vi = ListShows.ItemContainerGenerator.ContainerFromItem (fi) as ListViewItem;
+                        ProgressBar pb = vi.GetChildOfType<ProgressBar> ();
+                        pb.Visibility = Visibility.Visible;
+                        if (fi.IfNotDownloaded)
+                        {
+                            continue;
+                        }
+                        await CopyMovie (fi, pb, fd.SelectedPath);
+                    }
+                }
+            }
+        }
+
+        private Task CopyMovie (FeedItem fi, ProgressBar pb, string selectedPath)
+        {
+            string path = System.IO.Path.GetDirectoryName (fi.LocalMovie);
+            string file = System.IO.Path.GetFileName (fi.LocalMovie);
+
+            int index = path.LastIndexOf ('\\');
+            string datefolder = path.Substring (index + 1);
+
+            string targetdir = selectedPath + datefolder + '\\';
+
+            if (!System.IO.Directory.Exists (targetdir))
+            {
+                System.IO.Directory.CreateDirectory (targetdir);
+            }
+
+            /* modify the LocalMovie element of the feed.xml file
+               -------------------------------------------------- */
+
+            XmlDocument doc = new XmlDocument ();
+            doc.Load (new StreamReader (path + "\\feed.xml"));
+            XmlNode node = doc.SelectSingleNode ("//LocalMovie");
+            node.InnerText = targetdir + file;
+            doc.Save (targetdir + "\\feed.xml");
+
+
+           // File.Copy (path + "\\feed.xml", targetdir + "\\feed.xml", true);
+
+            FileCopier fc = new FileCopier ( fi.LocalMovie, targetdir + file);
+
+            fc.OnProgressChanged += (percentage) =>
+            {
+                Application.Current.Dispatcher.BeginInvoke (System.Windows.Threading.DispatcherPriority.Background, new Action (() => pb.Value = percentage));
+            };
+
+            fc.OnComplete += (() =>
+            {
+                Application.Current.Dispatcher.BeginInvoke (System.Windows.Threading.DispatcherPriority.Background, new Action (() => pb.Visibility = Visibility.Hidden));
+            });
+
+            return Task.Run (() =>
+            {
+                fc.Copy ();
+            });
         }
     }
 }
