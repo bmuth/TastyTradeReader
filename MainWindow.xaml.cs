@@ -118,7 +118,7 @@ namespace TastyTradeReader
             foreach (var el in items)
             {
                 string movie = el.Element ("guid").Value;
-                if (!movie.EndsWith (".mov"))
+                if (! (movie.EndsWith (".mov") || movie.EndsWith (".mp4")) )
                 {
                     continue;
                 }
