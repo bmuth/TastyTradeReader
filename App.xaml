@@ -4,6 +4,6 @@
     xmlns:clr="clr-namespace:System;assembly=mscorlib"
     StartupUri="MainWindow.xaml">
     <Application.Resources>
-            <clr:String x:Key="PodcastPath">E:\Finance\TastyTradePodcasts\</clr:String>
+            <clr:String x:Key="PodcastPath">D:\Finance\TastyTradePodcasts\</clr:String>
     </Application.Resources>
 </Application>

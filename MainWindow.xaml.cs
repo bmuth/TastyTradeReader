@@ -90,11 +90,28 @@ namespace TastyTradeReader
                 m_FeedDictionary = new FeedDict ();
                 foreach (var folder in folders)
                 {
+                    DateTime dt;
+                    FeedItem fi = null;
                     string f = new DirectoryInfo (folder).Name;
-                    DateTime dt = DateTime.ParseExact (f, "yyyy-MMM-dd HHmm", CultureInfo.InvariantCulture);
-                    StreamReader sr = new StreamReader (folder + "\\feed.xml");
-                    XmlSerializer xr = new XmlSerializer (typeof (FeedItem));
-                    FeedItem fi = (FeedItem) xr.Deserialize (sr);
+                    try
+                    {
+                        dt = DateTime.ParseExact (f, "yyyy-MMM-dd HHmm", CultureInfo.InvariantCulture);
+                    }
+                    catch (Exception )
+                    {
+                        continue;
+                    }
+                    try
+                    {
+                        StreamReader sr = new StreamReader (folder + "\\feed.xml");
+                        XmlSerializer xr = new XmlSerializer (typeof (FeedItem));
+                        fi = (FeedItem) xr.Deserialize (sr);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show (string.Format ("Failed to deserialize {0}. {1}. Will skip", folder + "\\feed.xml", ex.Message));
+                        continue;
+                    }
                     m_FeedDictionary[dt] = fi;
                 }
             }
