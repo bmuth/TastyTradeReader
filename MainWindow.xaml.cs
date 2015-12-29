@@ -125,7 +125,18 @@ namespace TastyTradeReader
         {
             Feed feed = new Feed ();
 
-            XElement root = await LoadXDocumentAsync ("https://feeds.tastytrade.com/podcast.rss");
+            XElement root;
+
+            try
+            {
+                root = await LoadXDocumentAsync ("https://feeds.tastytrade.com/podcast.rss");
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show (string.Format ("Failed to access tastytrade podcasts. {0}", e.Message));
+                return feed;
+            }
+
             XNamespace itunes = "http://www.itunes.com/dtds/podcast-1.0.dtd";
 
             var items = (from el in root.Descendants ("item")
