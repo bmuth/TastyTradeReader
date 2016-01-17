@@ -502,5 +502,10 @@ namespace TastyTradeReader
                 fc.Copy ();
             });
         }
+
+        private void btnRefresh_Click (object sender, RoutedEventArgs e)
+        {
+            GetFullFeed ();
+        }
     }
 }
