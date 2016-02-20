@@ -23,15 +23,6 @@ namespace TastyTradeReader.Properties {
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("E:\\Finance\\TastyTradePodcasts\\")]
-        public string PodcastPath {
-            get {
-                return ((string)(this["PodcastPath"]));
-            }
-        }
-        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("300")]
@@ -53,6 +44,15 @@ namespace TastyTradeReader.Properties {
             }
             set {
                 this["VidWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("e:\\Finance\\TastyTradePodcasts\\")]
+        public string PodcastPath {
+            get {
+                return ((string)(this["PodcastPath"]));
             }
         }
     }

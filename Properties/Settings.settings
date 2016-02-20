@@ -2,14 +2,14 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="TastyTradeReader.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="PodcastPath" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">E:\Finance\TastyTradePodcasts\</Value>
-    </Setting>
     <Setting Name="VidHeight" Type="System.Double" Scope="User">
       <Value Profile="(Default)">300</Value>
     </Setting>
     <Setting Name="VidWidth" Type="System.Double" Scope="User">
       <Value Profile="(Default)">500</Value>
+    </Setting>
+    <Setting Name="PodcastPath" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">e:\Finance\TastyTradePodcasts\</Value>
     </Setting>
   </Settings>
 </SettingsFile>

@@ -32,7 +32,7 @@ namespace TastyTradeReader
         private List<FeedItem> m_DisplayedFeed;
         private List<FeedItem> m_FavouriteFeed;
         private List<FeedItem> m_DomainFeed;  // either local or remote
-        private FeedDict m_FeedDictionary;
+        //private FeedDict m_FeedDictionary;
         private int CurrentOffset = 0;
         private string RootDir;
 
@@ -50,25 +50,37 @@ namespace TastyTradeReader
             }
         }
 
+        /*************************************************************
+        *
+        * MainPageLoaded
+        *
+        *************************************************************/
+
         private void MainPageLoaded (object sender, RoutedEventArgs e)
         {
             GetFullFeed ();
         }
 
+        /*************************************************************
+        *
+        * GetFullFeed
+        *
+        *************************************************************/
+
         private async void GetFullFeed ()
         {
-            FetchLocalFeedAsDictionary ();
+            FeedDict fd = FetchLocalFeedAsDictionary ();
             Feed feed = await FetchTastyTradeFeed ();
 
             foreach (FeedItem fi in feed)
             {
-                if (!m_FeedDictionary.ContainsKey (fi.PubDate))
+                if (!fd.ContainsKey (fi.PubDate))
                 {
-                    m_FeedDictionary[fi.PubDate] = fi;
+                    fd[fi.PubDate] = fi;
                 }
             }
 
-            m_DomainFeed = (from pair in m_FeedDictionary
+            m_DomainFeed = (from pair in fd
                            orderby pair.Key descending
                            select pair.Value).ToList ();
 
@@ -78,16 +90,21 @@ namespace TastyTradeReader
             FeedGrid.DataContext = m_DisplayedFeed;
         }
 
-        private void FetchLocalFeedAsDictionary ()
+        /*************************************************************
+        *
+        * FetchLocalFeedAsDictionary
+        *
+        *************************************************************/
+
+        private FeedDict FetchLocalFeedAsDictionary ()
         {
-            m_FeedDictionary = new FeedDict ();
+            FeedDict fd = new FeedDict ();
 
             string path = RootDir;
 
             try
             {
                 var folders = Directory.EnumerateDirectories (path);
-                m_FeedDictionary = new FeedDict ();
                 foreach (var folder in folders)
                 {
                     DateTime dt;
@@ -112,14 +129,21 @@ namespace TastyTradeReader
                         MessageBox.Show (string.Format ("Failed to deserialize {0}. {1}. Will skip", folder + "\\feed.xml", ex.Message));
                         continue;
                     }
-                    m_FeedDictionary[dt] = fi;
+                    fd[dt] = fi;
                 }
             }
             catch (Exception e)
             {
                 MessageBox.Show (string.Format ("Failed to enumerate locally downloaded podcasts. {0}", e.Message));
             }
+            return fd;
         }
+
+        /*************************************************************
+        *
+        * async Task<Feed> FetchTastyTradeFeed
+        *
+        *************************************************************/
 
         private async Task<Feed> FetchTastyTradeFeed ()
         {
@@ -162,6 +186,12 @@ namespace TastyTradeReader
             return feed;
         }
 
+        /*************************************************************
+        *
+        * async Task<XElement> LoadXDocumentAsync
+        *
+        *************************************************************/
+
         private async Task<XElement> LoadXDocumentAsync (string url)
         {
             WebClient client = new WebClient ();
@@ -169,6 +199,12 @@ namespace TastyTradeReader
             XElement x = XElement.Parse (await client.DownloadStringTaskAsync (uri));
             return x;
         }
+
+        /*************************************************************
+        *
+        * Download_Click
+        *
+        *************************************************************/
 
         private async void Download_Click (object sender, RoutedEventArgs e)
         {
@@ -185,7 +221,7 @@ namespace TastyTradeReader
             //button.Visibility = Visibility.Hidden;
             pb.Visibility = Visibility.Visible;
 
-            await DownloadMovie (fi, pb);
+            await DownloadImageAndMovie (fi, pb);
 
             //            pb.Visibility = Visibility.Hidden;
             //button.Visibility = Visibility.Visible;
@@ -198,11 +234,32 @@ namespace TastyTradeReader
             //            image.Source = bitmapImage;
         }
 
-        private async Task DownloadMovie (FeedItem fi, ProgressBar pb)
-        {
-            Uri uri = new Uri (fi.Movie);
+        /*************************************************************
+        *
+        * DownloadImageAndMovie
+        *
+        *************************************************************/
 
-            string filename = CreateFileName (fi);
+        private async Task DownloadImageAndMovie (FeedItem fi, ProgressBar pb)
+        {
+
+/*          download image
+            -------------- */
+
+            Uri ImageUri = new Uri (fi.RemoteImage);
+            string image_filename = CreateFileNameForImage (fi);
+
+            using (WebClient client = new WebClient ())
+            {
+                client.DownloadFile (ImageUri, image_filename);
+                fi.LocalImage = image_filename;
+            }
+
+/*          download movie
+            -------------- */
+
+            Uri uri = new Uri (fi.RemoteMovie);
+            string movie_filename = CreateFileNameForMovie (fi);
 
             using (WebClient client = new WebClient ())
             {
@@ -211,11 +268,16 @@ namespace TastyTradeReader
                     pb.Value = e.ProgressPercentage;
                 };
 
-                await client.DownloadFileTaskAsync (uri, filename);
-                fi.LocalMovie = filename;
+                await client.DownloadFileTaskAsync (uri, movie_filename);
+                fi.LocalMovie = movie_filename;
+
+                fi.Image = ConvertToUrlForm (fi.LocalImage);
+                fi.Movie = ConvertToUrlForm (fi.LocalMovie);
+
+                fi.IfDownloaded = true;
 
                 XmlSerializer ser = new XmlSerializer (typeof (FeedItem));
-                using (TextWriter writer = new StreamWriter (System.IO.Path.GetDirectoryName (filename) + "\\feed.xml"))
+                using (TextWriter writer = new StreamWriter (System.IO.Path.GetDirectoryName (movie_filename) + "\\feed.xml"))
                 {
                     ser.Serialize (writer, fi);
                     writer.Close ();
@@ -223,7 +285,26 @@ namespace TastyTradeReader
             }
         }
 
-        private string CreateFileName (FeedItem fi)
+        /*************************************************************
+        *
+        * ConvertToUrlForm
+        *
+        *************************************************************/
+
+        private string ConvertToUrlForm (string localImage)
+        {
+            StringBuilder sb = new StringBuilder ("file://");
+            sb.Append (localImage.Replace ('\\', '/'));
+            return sb.ToString ();
+        }
+
+        /*************************************************************
+        *
+        * CreateFileNameForImage
+        *
+        *************************************************************/
+
+        private string CreateFileNameForImage (FeedItem fi)
         {
             string path = RootDir; // (string) App.Current.Resources["PodcastPath"];
             string dir = fi.PubDate.ToString ("yyyy-MMM-dd HHmm");
@@ -237,10 +318,46 @@ namespace TastyTradeReader
                 string msg = ex.Message;
             }
             path += "\\";
-            string name = fi.Movie.Substring (fi.Movie.LastIndexOf ('/') + 1);
+            string name = fi.RemoteImage.Substring (fi.RemoteImage.LastIndexOf ('/') + 1);
+            int quest = name.IndexOf ('?');
+            if (quest >= 0)
+            {
+                name = name.Substring (0, quest);
+            }
             path += name;
             return path;
         }
+
+        /*************************************************************
+        *
+        * CreateFileNameForMovie
+        *
+        *************************************************************/
+
+        private string CreateFileNameForMovie (FeedItem fi)
+        {
+            string path = RootDir; // (string) App.Current.Resources["PodcastPath"];
+            string dir = fi.PubDate.ToString ("yyyy-MMM-dd HHmm");
+            path += dir;
+            try
+            {
+                Directory.CreateDirectory (path);
+            }
+            catch (Exception ex)
+            {
+                string msg = ex.Message;
+            }
+            path += "\\";
+            string name = fi.RemoteMovie.Substring (fi.RemoteMovie.LastIndexOf ('/') + 1);
+            path += name;
+            return path;
+        }
+
+        /*************************************************************
+        *
+        * Play
+        *
+        *************************************************************/
 
         private void Play_Click (object sender, RoutedEventArgs e)
         {
@@ -259,6 +376,12 @@ namespace TastyTradeReader
             vw.Show ();
         }
 
+        /*************************************************************
+        *
+        * Download Selected Movies
+        *
+        *************************************************************/
+
         private void btnOnlyDownloaded_Click (object sender, RoutedEventArgs e)
         {
             foreach (FeedItem fi in ListShows.SelectedItems)
@@ -266,9 +389,17 @@ namespace TastyTradeReader
                 ListViewItem vi = ListShows.ItemContainerGenerator.ContainerFromItem (fi) as ListViewItem;
                 ProgressBar pb = vi.GetChildOfType<ProgressBar> ();
                 pb.Visibility = Visibility.Visible;
-                DownloadMovie (fi, pb);
+                DownloadImageAndMovie (fi, pb);
             }
+
+            ListShows.UnselectAll ();
         }
+
+        /*************************************************************
+        *
+        * Show Only Favourites
+        *
+        *************************************************************/
 
         private void btnFavourites_Click (object sender, RoutedEventArgs e)
         {

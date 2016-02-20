@@ -23,8 +23,6 @@ namespace TastyTradeReader
     {
         private bool _ifdownloaded;
 
-        private string _image;
-
         public event PropertyChangedEventHandler PropertyChanged;
 
 
@@ -73,27 +71,11 @@ namespace TastyTradeReader
         public string Title { get; set; }
         public string Subtitle { get; set; }
         public string Image { get; set; }
-        public string Movie { get; set; }
-        public string LocalMovie
-        {
-            get
-            {
-                return _image;
-            }
-
-            set
-            {
-                if (string.IsNullOrEmpty (value))
-                {
-                    IfDownloaded = false;
-                }
-                else
-                {
-                    IfDownloaded = true;
-                }
-                _image = value;
-            }
-        }
+        public string  Movie { get; set; }
+        public string RemoteImage { get; set; }
+        public string RemoteMovie { get; set; }
+        public string LocalImage { get; set; }
+        public string LocalMovie { get; set; }
         public DateTime PubDate { get; set; }
 
         public FeedItem () { }
@@ -102,8 +84,10 @@ namespace TastyTradeReader
         {
             Title = title;
             Subtitle = subtitle;
-            Image = image;
-            Movie = movie;
+            RemoteImage = image;
+            RemoteMovie = movie;
+            Image = RemoteImage;
+            Movie = RemoteMovie;
             PubDate = pubdate;
         }
 
