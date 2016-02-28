@@ -41,6 +41,7 @@ namespace TastyTradeReader
             InitializeComponent ();
 
             RootDir = Properties.Settings.Default.PodcastPath;
+            Directory.SetCurrentDirectory (RootDir);
 
             List<string> man = new List<string> ();
             Assembly assembly = Assembly.GetExecutingAssembly ();
@@ -120,9 +121,11 @@ namespace TastyTradeReader
                     }
                     try
                     {
-                        StreamReader sr = new StreamReader (folder + "\\feed.xml");
-                        XmlSerializer xr = new XmlSerializer (typeof (FeedItem));
-                        fi = (FeedItem) xr.Deserialize (sr);
+                        using (StreamReader sr = new StreamReader (folder + "\\feed.xml"))
+                        {
+                            XmlSerializer xr = new XmlSerializer (typeof (FeedItem));
+                            fi = (FeedItem) xr.Deserialize (sr);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -294,6 +297,8 @@ namespace TastyTradeReader
         private string ConvertToUrlForm (string localImage)
         {
             StringBuilder sb = new StringBuilder ("file://");
+            sb.Append (Directory.GetCurrentDirectory ().Replace ('\\', '/'));
+            sb.Append ("/");
             sb.Append (localImage.Replace ('\\', '/'));
             return sb.ToString ();
         }
@@ -317,15 +322,15 @@ namespace TastyTradeReader
             {
                 string msg = ex.Message;
             }
-            path += "\\";
+            dir += "\\";
             string name = fi.RemoteImage.Substring (fi.RemoteImage.LastIndexOf ('/') + 1);
             int quest = name.IndexOf ('?');
             if (quest >= 0)
             {
                 name = name.Substring (0, quest);
             }
-            path += name;
-            return path;
+            dir += name;
+            return dir;
         }
 
         /*************************************************************
@@ -347,10 +352,10 @@ namespace TastyTradeReader
             {
                 string msg = ex.Message;
             }
-            path += "\\";
+            dir += "\\";
             string name = fi.RemoteMovie.Substring (fi.RemoteMovie.LastIndexOf ('/') + 1);
-            path += name;
-            return path;
+            dir += name;
+            return dir;
         }
 
         /*************************************************************
@@ -505,6 +510,12 @@ namespace TastyTradeReader
             }
         }
 
+        /***************************************************************************
+        *
+        * LocalFiles only
+        *
+        ***************************************************************************/
+
         private void btnLocalFiles_Click (object sender, RoutedEventArgs e)
         {
             if (btnLocalFiles.IsChecked == true)
@@ -520,10 +531,19 @@ namespace TastyTradeReader
                     try
                     {
                         DateTime dt = DateTime.ParseExact (f, "yyyy-MMM-dd HHmm", CultureInfo.InvariantCulture);
-                        StreamReader sr = new StreamReader (folder + "\\feed.xml");
-                        XmlSerializer xr = new XmlSerializer (typeof (FeedItem));
-                        FeedItem fi = (FeedItem) xr.Deserialize (sr);
-                        m_DomainFeed.Add (fi);
+                        using (StreamReader sr = new StreamReader (folder + "\\feed.xml"))
+                        {
+                            XmlSerializer xr = new XmlSerializer (typeof (FeedItem));
+                            FeedItem fi = (FeedItem) xr.Deserialize (sr);
+
+                            /* Update Image and Movie nodes
+                               ---------------------------- */
+
+                            fi.Image = ConvertToUrlForm (fi.LocalImage);
+                            fi.Movie = ConvertToUrlForm (fi.LocalMovie);
+
+                            m_DomainFeed.Add (fi);
+                        }
                     }
                     catch (Exception )
                     {
@@ -556,6 +576,7 @@ namespace TastyTradeReader
                 if (rc == System.Windows.Forms.DialogResult.OK)
                 {
                     RootDir = fd.SelectedPath;
+                    Directory.SetCurrentDirectory (RootDir);
                 }
 
                 btnLocalFiles.IsChecked = true;
@@ -564,6 +585,12 @@ namespace TastyTradeReader
             }
         }
 
+        /********************************************************************************
+        *
+        * Export clicked
+        *
+        ********************************************************************************/
+        
         private async void Export_Clicked (object sender, RoutedEventArgs e)
         {
             using (System.Windows.Forms.FolderBrowserDialog fd = new System.Windows.Forms.FolderBrowserDialog ())
@@ -583,38 +610,54 @@ namespace TastyTradeReader
                         {
                             continue;
                         }
+                        CopyImageAndXml (fi, fd.SelectedPath);
                         await CopyMovie (fi, pb, fd.SelectedPath);
                     }
                 }
             }
         }
 
-        private Task CopyMovie (FeedItem fi, ProgressBar pb, string selectedPath)
+        private void CopyImageAndXml (FeedItem fi, string TargetPath)
         {
-            string path = System.IO.Path.GetDirectoryName (fi.LocalMovie);
-            string file = System.IO.Path.GetFileName (fi.LocalMovie);
+            if (!(TargetPath.EndsWith ("\\") || TargetPath.EndsWith ("/")))
+            {
+                TargetPath += '\\';
+            }
+            string path = System.IO.Path.GetDirectoryName (fi.LocalImage);
+            string file = System.IO.Path.GetFileName (fi.LocalImage);
 
             int index = path.LastIndexOf ('\\');
             string datefolder = path.Substring (index + 1);
 
-            string targetdir = selectedPath + datefolder + '\\';
+            string targetdir = TargetPath + datefolder + '\\';
 
             if (!System.IO.Directory.Exists (targetdir))
             {
                 System.IO.Directory.CreateDirectory (targetdir);
             }
 
-            /* modify the LocalMovie element of the feed.xml file
-               -------------------------------------------------- */
+            File.Copy (fi.LocalImage, targetdir + file, true);
+            File.Copy (path + "\\feed.xml", targetdir + "feed.xml", true);
+        }
 
-            XmlDocument doc = new XmlDocument ();
-            doc.Load (new StreamReader (path + "\\feed.xml"));
-            XmlNode node = doc.SelectSingleNode ("//LocalMovie");
-            node.InnerText = targetdir + file;
-            doc.Save (targetdir + "\\feed.xml");
+        private Task CopyMovie (FeedItem fi, ProgressBar pb, string TargetPath)
+        {
+            if (! (TargetPath.EndsWith ("\\") || TargetPath.EndsWith ("/")))
+            {
+                TargetPath += '\\';
+            }
+            string path = System.IO.Path.GetDirectoryName (fi.LocalMovie);
+            string file = System.IO.Path.GetFileName (fi.LocalMovie);
 
+            int index = path.LastIndexOf ('\\');
+            string datefolder = path.Substring (index + 1);
 
-           // File.Copy (path + "\\feed.xml", targetdir + "\\feed.xml", true);
+            string targetdir = TargetPath + datefolder + '\\';
+
+            if (!System.IO.Directory.Exists (targetdir))
+            {
+                System.IO.Directory.CreateDirectory (targetdir);
+            }
 
             FileCopier fc = new FileCopier ( fi.LocalMovie, targetdir + file);
 

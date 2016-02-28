@@ -34,8 +34,8 @@ namespace TastyTradeReader
 
             InitializeComponent ();
 
-            ucMediaPlayer1.ImageFile = fi.RemoteImage;
-            ucMediaPlayer1.MovieFile = fi.LocalMovie;
+            ucMediaPlayer1.ImageFile = fi.Image;
+            ucMediaPlayer1.MovieFile = fi.Movie;
         }
 
         private void Video_Window_OnLoaded (object sender, RoutedEventArgs e)
