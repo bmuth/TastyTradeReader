@@ -49,7 +49,7 @@ namespace TastyTradeReader.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("e:\\Finance\\TastyTradePodcasts\\")]
+        [global::System.Configuration.DefaultSettingValueAttribute("\\\\PHOTOS3\\Finance\\TastyTradePodcasts")]
         public string PodcastPath {
             get {
                 return ((string)(this["PodcastPath"]));

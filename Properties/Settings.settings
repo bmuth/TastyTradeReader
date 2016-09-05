@@ -9,7 +9,7 @@
       <Value Profile="(Default)">500</Value>
     </Setting>
     <Setting Name="PodcastPath" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">e:\Finance\TastyTradePodcasts\</Value>
+      <Value Profile="(Default)">\\PHOTOS3\Finance\TastyTradePodcasts</Value>
     </Setting>
   </Settings>
 </SettingsFile>

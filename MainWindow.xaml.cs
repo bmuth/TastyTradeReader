@@ -41,6 +41,14 @@ namespace TastyTradeReader
             InitializeComponent ();
 
             RootDir = Properties.Settings.Default.PodcastPath;
+
+            /* Make sure it terminates in a \
+             * ------------------------------ */
+
+            if (RootDir[RootDir.Length - 1] != '\\')
+            {
+                RootDir += "\\";
+            }
             Directory.SetCurrentDirectory (RootDir);
 
             List<string> man = new List<string> ();
@@ -254,7 +262,22 @@ namespace TastyTradeReader
 
             using (WebClient client = new WebClient ())
             {
-                client.DownloadFile (ImageUri, image_filename);
+                try
+                {
+                    client.DownloadFile (ImageUri, image_filename);
+                }
+                catch (Exception e)
+                {
+                    string msg = "Failed to download picture.";
+                    while (e != null)
+                    {
+                        msg += "\r\n"+ e.Message;
+                        e = e.InnerException;
+                    }
+                    MessageBox.Show (msg);
+                    throw;
+
+                }
                 fi.LocalImage = image_filename;
             }
 
