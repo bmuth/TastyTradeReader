@@ -186,9 +186,19 @@ namespace TastyTradeReader
                     continue;
                 }
 
+                /* discovered the hard way that the image is not always defined
+                 * ------------------------------------------------------------ */
+
+                string image = null;
+                var ximage = el.Element (itunes + "image");
+                if (ximage != null)
+                {
+                    image = ximage.Attribute ("href").Value;
+                }
+
                 FeedItem fi = new FeedItem (el.Element ("title").Value,
                                               el.Element (itunes + "subtitle").Value,
-                                              el.Element (itunes + "image").Attribute ("href").Value,
+                                              image,
                                               el.Element ("guid").Value,
                                               DateTime.Parse (el.Element ("pubDate").Value));
                 feed.Add (fi);
