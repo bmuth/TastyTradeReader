@@ -49,8 +49,14 @@ namespace TastyTradeReader
             {
                 RootDir += "\\";
             }
-            Directory.SetCurrentDirectory (RootDir);
-
+            try
+            {
+                Directory.SetCurrentDirectory (RootDir);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show (string.Format ("{0}: {1}", RootDir, e.Message));
+            }
             List<string> man = new List<string> ();
             Assembly assembly = Assembly.GetExecutingAssembly ();
             foreach (string s in assembly.GetManifestResourceNames ())
